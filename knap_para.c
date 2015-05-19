@@ -36,64 +36,64 @@ void print_things(int n, int weight[n], int profit[n])
 
 void print_table(int n, int c, int total[n][c], int use[n][c])
 {
-  int i, j;
+  	int i, j;
 
-  printf("Total Profit\n");
-  for (j = 0; j < c; j++) {
-	for (i = 0; i < n; i++) {
-	  printf("%2d ",total[i][j]);
-	}
-	printf("\n");
-  }
+  	printf("Total Profit\n");
+  	for (j = 0; j < c; j++) {
+		for (i = 0; i < n; i++) {
+			printf("%2d ",total[i][j]);
+		}
+		printf("\n");
+  	}
 
-  printf("Flags\n");
-  for (j = 0; j < c; j++) {
-	for (i = 0; i < n; i++) {
-	  printf("%2d ",use[i][j]);
-	}
-	printf("\n");
-  }
+  	printf("Flags\n");
+  	for (j = 0; j < c; j++) {
+		for (i = 0; i < n; i++) {
+	  		printf("%2d ",use[i][j]);
+		}
+		printf("\n");
+  	}
 }
 
 
 void solver(int n, int c, int weight[n], int profit[n], 
 		   int total[n][c], int use[n][c], int nthreads)
 {
-  int i, j;
-/* Max profit using thing 0, if it fits */
-  for (j = 0; j < c; j++) {
-	if (weight[0] > j) {
-	  total[0][j] = 0;
-	  use[0][j] = 0;
-	} else {
-	  total[0][j] = profit[0];
-	  use[0][j] = 1;
-	}
-  }
+  	int i, j;
+	/* Max profit using thing 0, if it fits */
+  	for (j = 0; j < c; j++) {
+		if (weight[0] > j) {
+	  		total[0][j] = 0;
+	  		use[0][j] = 0;
+		} else {
+	  		total[0][j] = profit[0];
+	  		use[0][j] = 1;
+		}
+  	}
 
-  for (i = 1; i < n; i++) {
-/*
-  Here we want to compute a row in parallel.
-  Recurrence Relation:
-  (index i -- ith item; index j -- capacity j)
-  1. total[i][j] = total[i-1][j] if weight[i] > j or total[i-1][j] >= total[i-1][j-weight[i]] + profit[i]
-  2. total[i][j] = total[i-1][j-weight[i]] + profit[i]    otherwise
+  	for (i = 1; i < n; i++) {
+	/*
+  	Here we want to compute a row in parallel.
+  	Recurrence Relation:
+  	(index i -- ith item; index j -- capacity j)
+  	1. total[i][j] = total[i-1][j] if weight[i] > j or total[i-1][j] >= total[i-1][j-weight[i]] + profit[i]
+  	2. total[i][j] = total[i-1][j-weight[i]] + profit[i]    otherwise
 
-  So we can parallelly compute row i. Notice that when we compute ith row, we have already computed all rows before row i. When we calculate total[i][j], we don't need any other entry in ith row. So there is no race condition.
-*/
+  	So we can parallelly compute row i. Notice that when we compute ith row, we have already computed all rows before row i. When we calculate total[i][j], we don't need any other entry in ith row. So there is no race condition.
+	*/
 
-# pragma omp parallel for num_threads(nthreads) 
-	for (j = 0; j < c; j++) {
-	  if ( (j<weight[i]) || 
-		   (total[i-1][j] >= total[i-1][j-weight[i]] + profit[i])) {
-		total[i][j] = total[i-1][j];
-		use[i][j] = 0;
-	  } else {
-		total[i][j] = total[i-1][j-weight[i]] + profit[i];
-		use[i][j] = 1;
-	  }
-	}
-  }
+		# pragma omp parallel for num_threads(nthreads) 
+		for (j = 0; j < c; j++) {
+	  		if ( (j<weight[i]) || 
+		   	     (total[i-1][j] >= total[i-1][j-weight[i]] + profit[i])) {
+				total[i][j] = total[i-1][j];
+				use[i][j] = 0;
+	  		} else {
+				total[i][j] = total[i-1][j-weight[i]] + profit[i];
+				use[i][j] = 1;
+	  		}
+		}
+  	}
 }
 
 int main(int argc, char *argv[]) {
