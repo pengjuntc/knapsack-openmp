@@ -23,4 +23,4 @@ Recurrence Relation:
    the default maximum weights and values is 50.
 
 
-The program is tested on freightliner, which its CPU has 8 processors. 
+The program has been tested on freightliner, which its CPU has 8 processors. 
