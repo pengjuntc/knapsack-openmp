@@ -1,12 +1,14 @@
 #knapsack-openmp
 
 Basically, total[i][j] records the maximum value for i items (from 1 to i) with maximum capacity j.
+```
 Recurrence Relation:
   (index i -- ith item; index j -- capacity j)
   1. total[i][j] = total[i-1][j] if weight[i] > j or total[i-1][j] >= total[i-1][j-weight[i]] + profit[i]
   2. total[i][j] = total[i-1][j-weight[i]] + profit[i]    otherwise
+```
 
-  So we can parallelly compute row i. Notice that when we compute ith row, we have already computed all rows before row i. When we calculate total[i][j], we don't need any other entry in ith row. So there is no race condition.
+So we can parallelly compute row i. Notice that when we compute ith row, we have already computed all rows before row i. When we calculate total[i][j], we don't need any other entries in ith row. So there is no race condition.
 
 
 ###Test Instruction
